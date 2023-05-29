@@ -1,0 +1,83 @@
+{
+  "project_info": {
+    "project_number": "584108326866",
+    "firebase_url": "https://gbtour1-79f08-default-rtdb.firebaseio.com",
+    "project_id": "gbtour1-79f08",
+    "storage_bucket": "gbtour1-79f08.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584108326866:android:1b69a383c55626531c920b",
+        "android_client_info": {
+          "package_name": "com.example.gb_tour"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "584108326866-0mnpabg61hq5hln0spvggdmat0e0sjgl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAckx_cSx7ERjGwTBRdQIWt7RStjEuilpQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "584108326866-0mnpabg61hq5hln0spvggdmat0e0sjgl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "584108326866-4tk618bpjkeqqqsqc4fdbtnmu0jdagvj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gbtour1"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:584108326866:android:5e5544e835f6b9a41c920b",
+        "android_client_info": {
+          "package_name": "com.example.gbtour1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "584108326866-0mnpabg61hq5hln0spvggdmat0e0sjgl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAckx_cSx7ERjGwTBRdQIWt7RStjEuilpQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "584108326866-0mnpabg61hq5hln0spvggdmat0e0sjgl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "584108326866-4tk618bpjkeqqqsqc4fdbtnmu0jdagvj.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gbtour1"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
