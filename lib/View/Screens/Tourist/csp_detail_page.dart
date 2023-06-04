@@ -1,4 +1,5 @@
 import 'package:bulleted_list/bulleted_list.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -6,9 +7,11 @@ import '../../../Widgets/app_large_text.dart';
 import '../../../Widgets/app_text.dart';
 import '../../../Widgets/default_button.dart';
 import '../onboarding_hotel_images.dart';
+import 'car_booking.dart';
 
 class CSPDetailPage extends StatefulWidget {
-  const CSPDetailPage({Key? key}) : super(key: key);
+  final dynamic carDetails;
+  const CSPDetailPage({Key? key, required this.carDetails}) : super(key: key);
 
   @override
   State<CSPDetailPage> createState() => _CSPDetailPageState();
@@ -22,6 +25,21 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
       isFavorite = !isFavorite;
     });
   }
+
+  List<Widget> facilities = [];
+  getFacilities() {
+    print(widget.carDetails['facilities']);
+    if (widget.carDetails['facilities']['0'] == true) {
+      facilities.add(AppText(text: "Car park"));
+    }
+    if (widget.carDetails['facilities']['1'] == true) {
+      facilities.add(AppText(text: "Free Wi-Fi in all rooms!"));
+    }
+    if (widget.carDetails['facilities']['2'] == true) {
+      AppText(text: "Luggage storage");
+    }
+  }
+
   late PageController _controller;
   int current_index = 0;
   var images = {
@@ -36,6 +54,7 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
   void initState() {
     _controller = PageController(initialPage: 0);
     super.initState();
+    getFacilities();
   }
 
   @override
@@ -43,6 +62,14 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
     _controller.dispose();
     super.dispose();
   }
+
+  void toggleFavoriteCar(docId, bool status) {
+    FirebaseFirestore.instance
+        .collection('Cars')
+        .doc(docId)
+        .update({"isFavorite": status ? false : true});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -52,15 +79,15 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
           children: [
             PageView.builder(
                 controller: _controller,
-                itemCount: hotelImages.length,
+                itemCount: widget.carDetails["images"].length,
                 onPageChanged: (int index) {
                   setState(() {
                     current_index = index;
                   });
                 },
                 itemBuilder: (_, index) {
-                  return Image.asset(
-                    hotelImages[index].hotelImage,
+                  return Image.network(
+                    widget.carDetails["images"][index],
                     //height: 300,
                     fit: BoxFit.cover,
                   );
@@ -68,9 +95,10 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
             Padding(
               padding: EdgeInsets.all(18),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.pop(context);
                     },
                     child: Icon(
@@ -78,19 +106,19 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
                       color: Colors.black87,
                     ),
                   ),
-                  SizedBox(
-                    width: 320,
-                  ),
                   GestureDetector(
-
-                    child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border,
+                    child: Icon(
+                      widget.carDetails['isFavorite']
+                          ? Icons.favorite
+                          : Icons.favorite_border,
                       color: Colors.red,
                       size: 25,
                     ),
-                    onTap: (){
-                      toggleFavorite();
+                    onTap: () {
+                      toggleFavoriteCar(widget.carDetails.id,
+                          widget.carDetails['isFavorite']);
                     },
-                  ),
+                  )
                 ],
               ),
             ),
@@ -103,8 +131,8 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  hotelImages.length,
-                      (index) => buildDot(index, context),
+                  widget.carDetails["images"].length,
+                  (index) => buildDot(index, context),
                 ),
               ),
             ),
@@ -130,10 +158,12 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             AppLargeText(
-                              text: 'Car Name',
+                              text: widget.carDetails['name'],
                               size: 36,
                             ),
-                            AppLargeText(text: "12000/Day", size: 22),
+                            AppLargeText(
+                                text: "${widget.carDetails['price']}/Day",
+                                size: 22),
                           ],
                         ),
                         const SizedBox(height: 3),
@@ -142,7 +172,7 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
                             const Icon(Icons.location_on,
                                 size: 16, color: Colors.indigo),
                             AppText(
-                                text: 'Location',
+                                text: widget.carDetails['location'],
                                 size: 18,
                                 color: Colors.indigo),
                           ],
@@ -151,16 +181,12 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
                           height: 20,
                         ),
                         AppLargeText(text: 'Car Model'),
-                        AppText(
-                            text:
-                            "Lorem Ipsum is simply dummy text."),
+                        AppText(text: widget.carDetails['model']),
                         const SizedBox(
                           height: 20,
                         ),
                         AppLargeText(text: 'Description'),
-                        AppText(
-                            text:
-                            "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."),
+                        AppText(text: widget.carDetails['description']),
                         const SizedBox(
                           height: 20,
                         ),
@@ -174,13 +200,18 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
                                 color: Colors.indigo,
                               ),
                             ),
-                            listItems: [
-                              AppText(text: "Service 1"),
-                              AppText(text: "Service 2"),
-                              AppText(text: "Service 3"),
-                              AppText(text: "Service 4"),
-                              AppText(text: "Service 5"),
-                            ]),
+                            listItems: facilities
+                            // [
+                            //   AppText(text: "Service 1"),
+                            //   AppText(text: "Service 2"),
+                            //   AppText(text: "Service 3"),
+                            //   AppText(text: "Service 4"),
+                            //   AppText(text: "Service 5"),
+                            // ]
+                            ),
+                        SizedBox(
+                          height: 80,
+                        )
                       ],
                     ),
                   ),
@@ -190,12 +221,24 @@ class _CSPDetailPageState extends State<CSPDetailPage> {
             Positioned(
                 left: 25,
                 bottom: 0,
-                child: DefaultButton(buttonText: "Book Now"))
+                child: DefaultButton(
+                  buttonText: "Book Now",
+                  press: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: ((context) => CarBooking(
+                                  carDetails: widget.carDetails,
+                                ))));
+                    // bookCar();
+                  },
+                ))
           ],
         ),
       ),
     );
   }
+
   Container buildDot(int index, BuildContext context) {
     return Container(
       height: 10,

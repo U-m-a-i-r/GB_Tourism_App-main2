@@ -19,10 +19,11 @@ class Hotels extends StatefulWidget {
 class _HotelsState extends State<Hotels> {
   bool isFavorite = false;
 
-  void toggleFavorite() {
-    setState(() {
-      isFavorite = !isFavorite;
-    });
+  void toggleFavorite(docId, bool status) {
+    FirebaseFirestore.instance
+        .collection('Hotels')
+        .doc(docId)
+        .update({"isFavorite": status ? false : true});
   }
 
   @override
@@ -34,7 +35,7 @@ class _HotelsState extends State<Hotels> {
         title: Row(
           children: [
             Container(
-              margin: EdgeInsets.symmetric(horizontal: 105),
+              margin: EdgeInsets.symmetric(horizontal: 50),
               child: AppLargeText(
                 text: 'Hotels',
                 size: 20,
@@ -63,6 +64,7 @@ class _HotelsState extends State<Hotels> {
       body: StreamBuilder<QuerySnapshot>(
           stream: FirebaseFirestore.instance
               .collection('Hotels')
+              // .where('status', isEqualTo: "Unbooked")
               //  .where('hotelId',
               //    isEqualTo: FirebaseAuth.instance.currentUser!.uid)
               .snapshots(),
@@ -77,7 +79,7 @@ class _HotelsState extends State<Hotels> {
             }
 
             if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
-              return Text('No data available');
+              return Center(child: Text('No hotel is available'));
             }
             return GridView.builder(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -115,14 +117,15 @@ class _HotelsState extends State<Hotels> {
                             alignment: Alignment.topRight,
                             child: GestureDetector(
                               child: Icon(
-                                isFavorite
+                                snapshot.data!.docs[index]['isFavorite']
                                     ? Icons.favorite
                                     : Icons.favorite_border,
                                 color: Colors.red,
                                 size: 25,
                               ),
                               onTap: () {
-                                toggleFavorite();
+                                toggleFavorite(snapshot.data!.docs[index].id,
+                                    snapshot.data!.docs[index]['isFavorite']);
                               },
                             ),
                           ),

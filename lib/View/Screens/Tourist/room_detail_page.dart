@@ -10,6 +10,8 @@ import '../../../Widgets/default_button.dart';
 
 import 'package:url_launcher/url_launcher.dart' as url_launcher;
 
+import 'hotel_booking.dart';
+
 class RoomDetailPage extends StatefulWidget {
   final dynamic roomDetails;
   const RoomDetailPage({Key? key, required this.roomDetails}) : super(key: key);
@@ -36,11 +38,25 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
     "attraction_icon.png": "Attraction"
   };
   double rating = 0;
+  List<Widget> facilities = [];
+  getFacilities() {
+    print(widget.roomDetails['facilities']);
+    if (widget.roomDetails['facilities']['0'] == true) {
+      facilities.add(AppText(text: "Car park"));
+    }
+    if (widget.roomDetails['facilities']['1'] == true) {
+      facilities.add(AppText(text: "Free Wi-Fi in all rooms!"));
+    }
+    if (widget.roomDetails['facilities']['2'] == true) {
+      AppText(text: "Luggage storage");
+    }
+  }
 
   @override
   void initState() {
     _controller = PageController(initialPage: 0);
     super.initState();
+    getFacilities();
   }
 
   @override
@@ -56,24 +72,28 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            PageView.builder(
-                controller: _controller,
-                itemCount: widget.roomDetails["images"].length,
-                onPageChanged: (int index) {
-                  setState(() {
-                    current_index = index;
-                  });
-                },
-                itemBuilder: (_, index) {
-                  return Image.network(
-                    widget.roomDetails["images"][index],
-                    //height: 300,
-                    fit: BoxFit.cover,
-                  );
-                }),
+            SizedBox(
+              height: 370,
+              child: PageView.builder(
+                  controller: _controller,
+                  itemCount: widget.roomDetails["images"].length,
+                  onPageChanged: (int index) {
+                    setState(() {
+                      current_index = index;
+                    });
+                  },
+                  itemBuilder: (_, index) {
+                    return Image.network(
+                      widget.roomDetails["images"][index],
+                      //height: 300,
+                      fit: BoxFit.cover,
+                    );
+                  }),
+            ),
             Padding(
               padding: EdgeInsets.all(18),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   GestureDetector(
                     onTap: () {
@@ -83,9 +103,6 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
                       Icons.arrow_back,
                       color: Colors.black87,
                     ),
-                  ),
-                  SizedBox(
-                    width: 320,
                   ),
                   GestureDetector(
                     child: Icon(
@@ -162,13 +179,7 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
                                 color: Colors.indigo,
                               ),
                             ),
-                            listItems: [
-                              AppText(text: "Service 1"),
-                              AppText(text: "Service 2"),
-                              AppText(text: "Service 3"),
-                              AppText(text: "Service 4"),
-                              AppText(text: "Service 5"),
-                            ]),
+                            listItems: facilities),
                         const SizedBox(
                           height: 20,
                         ),
@@ -187,7 +198,13 @@ class _RoomDetailPageState extends State<RoomDetailPage> {
                 child: DefaultButton(
                   buttonText: "Book Now",
                   press: () {
-                    openWhatsApp();
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => HotelBooking(
+                                  roomDetails: widget.roomDetails,
+                                )));
+                    // openWhatsApp();
                   },
                 ))
           ],

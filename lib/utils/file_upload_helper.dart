@@ -44,6 +44,7 @@ class FileManager {
       int maxFileSize, List<String>? allowedExtensions) async {
     List<String?> files = [];
     List<Media>? res1 = await ImagesPicker.pick(
+      count: 5,
       pickType: PickType.image,
       maxSize: maxFileSize,
     );

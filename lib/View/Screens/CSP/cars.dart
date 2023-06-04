@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gb_tour/View/Screens/Tourist/csp_detail_page.dart';
 
@@ -21,6 +22,14 @@ class _CarsState extends State<Cars> {
       isFavorite = !isFavorite;
     });
   }
+
+  void toggleFavoriteCar(docId, bool status) {
+    FirebaseFirestore.instance
+        .collection('Cars')
+        .doc(docId)
+        .update({"isFavorite": status ? false : true});
+  }
+
   List dropDownPlaceList = [
     {"title": "Hunza", "value": "1"},
     {"title": "Skardu", "value": "2"},
@@ -39,95 +48,130 @@ class _CarsState extends State<Cars> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.white,
-        title: Row(
-          children: [
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 110),
-              child: AppLargeText(
-                text: 'Cars',
-                size: 20,
+        appBar: AppBar(
+          elevation: 0,
+          backgroundColor: Colors.white,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                child: AppLargeText(
+                  text: 'Cars',
+                  size: 20,
+                ),
               ),
-            ),
-            const Spacer(),
-            GestureDetector(
-                onTap: (){
-                  showCarsFilterDialog(context);
-                },
-                child: Icon(Icons.filter_list)),
-          ],
+              const Spacer(),
+              GestureDetector(
+                  onTap: () {
+                    showCarsFilterDialog(context);
+                  },
+                  child: Icon(Icons.filter_list)),
+            ],
+          ),
+          iconTheme: const IconThemeData(color: Colors.black87),
         ),
-        iconTheme: const IconThemeData(color: Colors.black87),
-      ),
-      drawer: const DrawerScreen(),
-      body: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2),
-          itemCount: 8,
-          itemBuilder: (context, index){
-            return GestureDetector(
-              onTap: (){
-                Navigator.push(context, MaterialPageRoute(builder: (context)=>const CSPDetailPage()));
-              },
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                padding: const EdgeInsets.all(12),
-                height: 180,
-                width: 160,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  image: const DecorationImage(
-                    image: AssetImage("lib/assets/WelcomeImage.jpeg"),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      alignment: Alignment.topRight,
-                      child: GestureDetector(
+        drawer: const DrawerScreen(),
+        body: StreamBuilder<QuerySnapshot>(
+            stream: FirebaseFirestore.instance
+                .collection('Cars')
+                .where('status', isEqualTo: "Unbooked")
+                //    isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+                .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
 
-                        child: Icon(isFavorite ? Icons.favorite : Icons.favorite_border,
-                          color: Colors.red,
-                          size: 25,
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
+                return Text('No data available');
+              }
+              return GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2),
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => CSPDetailPage(
+                                      carDetails: snapshot.data!.docs[index],
+                                    )));
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 8),
+                        padding: const EdgeInsets.all(12),
+                        height: 180,
+                        width: 160,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
+                            image: NetworkImage(
+                                snapshot.data!.docs[index]['images'][0]),
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        onTap: (){
-                          toggleFavorite();
-                        },
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                                alignment: Alignment.topRight,
+                                child: GestureDetector(
+                                  child: Icon(
+                                    snapshot.data!.docs[index]['isFavorite']
+                                        ? Icons.favorite
+                                        : Icons.favorite_border,
+                                    color: Colors.red,
+                                    size: 25,
+                                  ),
+                                  onTap: () {
+                                    toggleFavoriteCar(
+                                        snapshot.data!.docs[index].id,
+                                        snapshot.data!.docs[index]
+                                            ['isFavorite']);
+                                  },
+                                )),
+                            const Spacer(),
+                            Container(
+                              child: AppText(
+                                text: snapshot.data!.docs[index]['name'],
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                              alignment: Alignment.bottomLeft,
+                            ),
+                            SizedBox(
+                              height: 8,
+                            )
+                          ],
+                        ),
                       ),
-                    ),
-                    const Spacer(),
-                    Container(
-                      child: AppText(
-                        text: 'Car Name',
-                        color: Colors.white,
-                        size: 20,
-                      ),
-                      alignment: Alignment.bottomLeft,
-                    ),
-                    SizedBox(
-                      height: 8,
-                    )
-                  ],
-                ),
-              ),
-            );
-          }),
-    );
+                    );
+                  });
+            }));
   }
+
   showCarsFilterDialog(BuildContext context) {
     AlertDialog alert = AlertDialog(
-      title: AppLargeText(text: "Find your perfect car", size: 22,),
+      title: AppLargeText(
+        text: "Find your perfect car",
+        size: 22,
+      ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           InputDecorator(
             decoration: InputDecoration(
               border:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               contentPadding: const EdgeInsets.all(20),
             ),
             child: DropdownButtonHideUnderline(
@@ -159,7 +203,7 @@ class _CarsState extends State<Cars> {
           InputDecorator(
             decoration: InputDecoration(
               border:
-              OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
               contentPadding: const EdgeInsets.all(20),
             ),
             child: DropdownButtonHideUnderline(
@@ -190,8 +234,8 @@ class _CarsState extends State<Cars> {
           DefaultButton(
             buttonText: "Filter",
             press: () {
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => Cars()));
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (context) => Cars()));
             },
           ),
         ],

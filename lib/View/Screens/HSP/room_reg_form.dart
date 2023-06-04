@@ -26,7 +26,6 @@ class _RoomRegFormState extends State<RoomRegForm> {
   TextEditingController roomNo = TextEditingController();
   TextEditingController roomprice = TextEditingController();
   TextEditingController description = TextEditingController();
-  TextEditingController location = TextEditingController();
   RxList<File> listFiles = <File>[].obs;
   List<String> filesURL = [];
   List dropDownListData = [
@@ -70,7 +69,6 @@ class _RoomRegFormState extends State<RoomRegForm> {
   addRoom() async {
     if (roomName.text.isEmpty ||
         description.text.isEmpty ||
-        location.text.isEmpty ||
         roomNo.text.isEmpty ||
         roomprice.text.isEmpty) {
       Get.showSnackbar(const GetSnackBar(
@@ -100,10 +98,10 @@ class _RoomRegFormState extends State<RoomRegForm> {
           'price': roomprice.text,
           'hotelId': widget.hotelId,
           'description': description.text,
-          'place': defaultValue,
-          'location': location.text,
+          //  'place': defaultValue,
           'images': filesURL,
           'facilities': facilities,
+          "isFavorite": false,
           'status': 'Unbooked'
         }).then((value) {
           ProgressDialogUtils.hideProgressDialog();
@@ -130,7 +128,6 @@ class _RoomRegFormState extends State<RoomRegForm> {
     roomNo.dispose();
     roomprice.dispose();
     description.dispose();
-    location.dispose();
     super.dispose();
   }
 
@@ -214,70 +211,70 @@ class _RoomRegFormState extends State<RoomRegForm> {
                     border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10))),
               ),
-              SizedBox(
-                height: 20,
-              ),
-              Align(
-                  alignment: Alignment.topLeft,
-                  child: AppLargeText(
-                    text: "Place",
-                    size: 20,
-                  )),
-              SizedBox(
-                height: 8,
-              ),
-              InputDecorator(
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  contentPadding: const EdgeInsets.all(20),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                      isDense: true,
-                      value: defaultValue,
-                      isExpanded: true,
-                      menuMaxHeight: 350,
-                      items: [
-                        const DropdownMenuItem(
-                            child: Text(
-                              "Select Place",
-                            ),
-                            value: ""),
-                        ...dropDownListData
-                            .map<DropdownMenuItem<String>>((data) {
-                          return DropdownMenuItem(
-                              child: Text(data['title']), value: data['value']);
-                        }).toList(),
-                      ],
-                      onChanged: (value) {
-                        print("selected Value $value");
-                        setState(() {
-                          defaultValue = value!;
-                        });
-                      }),
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              Align(
-                  alignment: Alignment.topLeft,
-                  child: AppLargeText(
-                    text: "Hotel Location",
-                    size: 20,
-                  )),
-              SizedBox(
-                height: 8,
-              ),
-              TextFormField(
-                controller: location,
-                decoration: InputDecoration(
-                    filled: true,
-                    hintText: "Enter Location",
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10))),
-              ),
+              // SizedBox(
+              //   height: 20,
+              // ),
+              // Align(
+              //     alignment: Alignment.topLeft,
+              //     child: AppLargeText(
+              //       text: "Place",
+              //       size: 20,
+              //     )),
+              // SizedBox(
+              //   height: 8,
+              // ),
+              // InputDecorator(
+              //   decoration: InputDecoration(
+              //     border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(10)),
+              //     contentPadding: const EdgeInsets.all(20),
+              //   ),
+              //   child: DropdownButtonHideUnderline(
+              //     child: DropdownButton<String>(
+              //         isDense: true,
+              //         value: defaultValue,
+              //         isExpanded: true,
+              //         menuMaxHeight: 350,
+              //         items: [
+              //           const DropdownMenuItem(
+              //               child: Text(
+              //                 "Select Place",
+              //               ),
+              //               value: ""),
+              //           ...dropDownListData
+              //               .map<DropdownMenuItem<String>>((data) {
+              //             return DropdownMenuItem(
+              //                 child: Text(data['title']), value: data['value']);
+              //           }).toList(),
+              //         ],
+              //         onChanged: (value) {
+              //           print("selected Value $value");
+              //           setState(() {
+              //             defaultValue = value!;
+              //           });
+              //         }),
+              //   ),
+              // ),
+              // const SizedBox(
+              //   height: 20,
+              // ),
+              // Align(
+              //     alignment: Alignment.topLeft,
+              //     child: AppLargeText(
+              //       text: "Hotel Location",
+              //       size: 20,
+              //     )),
+              // SizedBox(
+              //   height: 8,
+              // ),
+              // TextFormField(
+              //   controller: location,
+              //   decoration: InputDecoration(
+              //       filled: true,
+              //       hintText: "Enter Location",
+              //       border: OutlineInputBorder(
+              //           borderRadius: BorderRadius.circular(10))),
+              // ),
               const SizedBox(
                 height: 20,
               ),

@@ -51,7 +51,8 @@ class _SignupScreenState extends State<SignupScreen> {
             'email': _email.text,
             'pass': _pass.text,
             'phone': _phone.text,
-            'uid': user.uid
+            'uid': user.uid,
+            'profileURL': ""
           }).then((value) {
             Navigator.pop(context);
           });

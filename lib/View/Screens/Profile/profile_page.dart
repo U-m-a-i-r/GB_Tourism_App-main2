@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,9 +8,15 @@ import 'package:gb_tour/Widgets/app_text.dart';
 import '../Login.dart';
 import 'edit_profile_page.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   ProfilePage({Key? key}) : super(key: key);
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  var profile;
   final List profileMenuList = [
     // {
     //   "leading": Container(
@@ -86,6 +93,23 @@ class ProfilePage extends StatelessWidget {
       "action_id": 3,
     },
   ];
+  getUserDetails() async {
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .where('uid', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((value) {
+      setState(() {
+        profile = value.docs.first;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    getUserDetails();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +183,7 @@ class ProfilePage extends StatelessWidget {
                 height: 10,
               ),
               AppLargeText(
-                text: 'User Name',
+                text: FirebaseAuth.instance.currentUser!.email!,
                 size: 20,
               ),
               const SizedBox(

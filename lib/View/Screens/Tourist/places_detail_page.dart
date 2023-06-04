@@ -339,7 +339,9 @@ class _PlacesDetailPageState extends State<PlacesDetailPage> {
                                             context,
                                             MaterialPageRoute(
                                                 builder: (context) =>
-                                                    CSPDetailPage()));
+                                                    CSPDetailPage(
+                                                      carDetails: "",
+                                                    )));
                                       },
                                     ),
                                   ],

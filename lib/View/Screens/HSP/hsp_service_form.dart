@@ -99,6 +99,7 @@ class _HSPServiceFormState extends State<HSPServiceForm> {
           'place': defaultValue,
           'location': location.text,
           'images': filesURL,
+          "isFavorite": false,
           'facilities': facilities
         }).then((value) {
           ProgressDialogUtils.hideProgressDialog();

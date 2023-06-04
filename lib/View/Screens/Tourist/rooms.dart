@@ -67,6 +67,7 @@ class _RoomsState extends State<Rooms> {
           stream: FirebaseFirestore.instance
               .collection('Rooms')
               .where('hotelId', isEqualTo: widget.hotelId)
+              .where('status', isEqualTo: "Unbooked")
               .snapshots(),
           builder:
               (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {

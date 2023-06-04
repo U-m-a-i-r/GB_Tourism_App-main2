@@ -1,14 +1,12 @@
 import 'package:bulleted_list/bulleted_list.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:gb_tour/View/Screens/Tourist/room_detail_page.dart';
 import 'package:gb_tour/View/Screens/Tourist/rooms.dart';
 import 'package:gb_tour/Widgets/app_large_text.dart';
 
 import '../../../Widgets/app_text.dart';
-import '../onboarding_hotel_images.dart';
 
 class HotelDetailPage extends StatefulWidget {
   final dynamic hotelDetails;
@@ -22,10 +20,18 @@ class HotelDetailPage extends StatefulWidget {
 class _HotelDetailPageState extends State<HotelDetailPage> {
   bool isFavorite = false;
 
-  void toggleFavorite() {
-    setState(() {
-      isFavorite = !isFavorite;
-    });
+  void toggleFavorite(docId, bool status) {
+    FirebaseFirestore.instance
+        .collection('Rooms')
+        .doc(docId)
+        .update({"isFavorite": status ? false : true});
+  }
+
+  void toggleFavoriteHotel(docId, bool status) {
+    FirebaseFirestore.instance
+        .collection('Hotels')
+        .doc(docId)
+        .update({"isFavorite": status ? false : true});
   }
 
   late PageController _controller;
@@ -37,11 +43,26 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
     "attraction_icon.png": "Attraction"
   };
   double rating = 0;
+  List<Widget> facilities = [];
+  getFacilities() {
+    print(widget.hotelDetails['facilities']);
+    if (widget.hotelDetails['facilities']['0'] == true) {
+      facilities.add(AppText(text: "Car park"));
+    }
+    if (widget.hotelDetails['facilities']['1'] == true) {
+      facilities.add(AppText(text: "Free Wi-Fi in all rooms!"));
+    }
+    if (widget.hotelDetails['facilities']['2'] == true) {
+      AppText(text: "Luggage storage");
+    }
+  }
 
   @override
   void initState() {
     _controller = PageController(initialPage: 0);
+
     super.initState();
+    getFacilities();
   }
 
   @override
@@ -57,22 +78,29 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
       body: SafeArea(
         child: Stack(
           children: [
-            PageView.builder(
-                controller: _controller,
-                itemCount: widget.hotelDetails["images"].length,
-                onPageChanged: (int index) {
-                  setState(() {
-                    current_index = index;
-                  });
-                },
-                itemBuilder: (_, index) {
-                  return Image.network(
-                    widget.hotelDetails["images"][index],
-                    //height: 300,
-                    fit: BoxFit.cover,
-                  );
-                }),
+            SizedBox(
+              height: 270,
+              child: PageView.builder(
+                  controller: _controller,
+                  itemCount: widget.hotelDetails["images"].length,
+                  onPageChanged: (int index) {
+                    setState(() {
+                      current_index = index;
+                    });
+                  },
+                  itemBuilder: (_, index) {
+                    return SizedBox(
+                      // height: 100,
+                      child: Image.network(
+                        widget.hotelDetails["images"][index],
+                        //height: 300,
+                        fit: BoxFit.cover,
+                      ),
+                    );
+                  }),
+            ),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Padding(
                   padding: EdgeInsets.all(18),
@@ -86,19 +114,19 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  width: 280,
-                ),
                 Padding(
                   padding: EdgeInsets.all(18),
                   child: GestureDetector(
                     child: Icon(
-                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      widget.hotelDetails['isFavorite']
+                          ? Icons.favorite
+                          : Icons.favorite_border,
                       color: Colors.red,
                       size: 25,
                     ),
                     onTap: () {
-                      toggleFavorite();
+                      toggleFavoriteHotel(widget.hotelDetails.id,
+                          widget.hotelDetails['isFavorite']);
                     },
                   ),
                 ),
@@ -174,21 +202,7 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                                 color: Colors.indigo,
                               ),
                             ),
-                            listItems: [
-                              widget.hotelDetails['facilities'][0] == true
-                                  ? AppText(text: "Car park")
-                                  : null,
-                              widget.hotelDetails['facilities'][1] == true
-                                  ? AppText(text: "Car park")
-                                  : null,
-                              widget.hotelDetails['facilities'][2] == true
-                                  ? AppText(text: "Car park")
-                                  : null,
-                              // AppText(text: "Car Parking"),
-                              // AppText(text: "Car Parking"),
-                              // AppText(text: "Car Parking"),
-                              // AppText(text: "Car Parking"),
-                            ]),
+                            listItems: facilities),
                         SizedBox(
                           height: 20,
                         ),
@@ -225,6 +239,7 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                                   .collection('Rooms')
                                   .where('hotelId',
                                       isEqualTo: widget.hotelDetails.id)
+                                  .where('status', isEqualTo: "Unbooked")
                                   .snapshots(),
                               builder: (BuildContext context,
                                   AsyncSnapshot<QuerySnapshot> snapshot) {
@@ -273,7 +288,9 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                                                         Alignment.topRight,
                                                     child: GestureDetector(
                                                       child: Icon(
-                                                        isFavorite
+                                                        snapshot.data!
+                                                                    .docs[index]
+                                                                ['isFavorite']
                                                             ? Icons.favorite
                                                             : Icons
                                                                 .favorite_border,
@@ -281,7 +298,12 @@ class _HotelDetailPageState extends State<HotelDetailPage> {
                                                         size: 25,
                                                       ),
                                                       onTap: () {
-                                                        toggleFavorite();
+                                                        toggleFavorite(
+                                                            snapshot.data!
+                                                                .docs[index].id,
+                                                            snapshot.data!
+                                                                    .docs[index]
+                                                                ['isFavorite']);
                                                       },
                                                     ),
                                                   ),

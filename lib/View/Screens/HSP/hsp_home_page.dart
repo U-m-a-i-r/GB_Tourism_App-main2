@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:gb_tour/View/Screens/HSP/room_reg_form.dart';
 import 'package:gb_tour/View/Screens/Profile/profile_page.dart';
@@ -10,9 +9,9 @@ import 'package:gb_tour/utils/size_utils.dart';
 
 import '../../../Widgets/app_large_text.dart';
 import '../../../Widgets/app_text.dart';
-import '../../../utils/constantsl.dart';
 import '../../../utils/progress_dialog_utils.dart';
 import '../drawer.dart';
+import 'all_bookings.dart';
 
 class HSPHomePage extends StatefulWidget {
   const HSPHomePage({Key? key}) : super(key: key);
@@ -129,6 +128,9 @@ class _HSPHomePageState extends State<HSPHomePage> {
                                     child: AppText(
                                       text: "Update",
                                     ),
+                                    onTap: () {
+                                      update();
+                                    },
                                   ),
                                   PopupMenuItem(
                                     padding: const EdgeInsets.symmetric(
@@ -144,13 +146,15 @@ class _HSPHomePageState extends State<HSPHomePage> {
                                     },
                                   ),
                                 ],
-                                child: Container(
-                                  child: Icon(
-                                    Icons.more_vert,
-                                    color: Colors.white,
-                                    size: getSize(25),
+                                child: Builder(
+                                  builder: (BuildContext context) => Container(
+                                    child: Icon(
+                                      Icons.more_vert,
+                                      color: Colors.white,
+                                      size: getSize(25),
+                                    ),
+                                    alignment: Alignment.topRight,
                                   ),
-                                  alignment: Alignment.topRight,
                                 ),
                               ),
                               SizedBox(
@@ -207,6 +211,18 @@ class _HSPHomePageState extends State<HSPHomePage> {
                       checkHotel();
                       // showDialogWidget(context);
                     })),
+            Positioned(
+                bottom: 0,
+                child: DefaultButton(
+                    buttonText: "Booking Requests",
+                    press: () {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => AllHotelBookings()));
+                      //   checkHotel();
+                      // showDialogWidget(context);
+                    })),
           ],
         )
         //  ListView.builder(
@@ -221,6 +237,16 @@ class _HSPHomePageState extends State<HSPHomePage> {
         // );
 
         );
+  }
+
+  update() {
+    Navigator.pop(context);
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HSPServiceForm(),
+      ),
+    );
   }
 
   changeStatus(docId, String status) {
